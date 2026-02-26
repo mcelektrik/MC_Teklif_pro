@@ -1,0 +1,27 @@
+﻿# Editable Git install with no remote (mc-teklif-pro==0.1.0)
+altgraph==0.17.5
+colorama==0.4.6
+-e c:\users\muslu\documents\trae_projects\mc_teklif_pro
+et_xmlfile==2.0.0
+greenlet==3.3.2
+iniconfig==2.3.0
+Jinja2==3.1.6
+MarkupSafe==3.0.3
+openpyxl==3.1.5
+packaging==26.0
+pefile==2024.8.26
+playwright==1.58.0
+pluggy==1.6.0
+pyee==13.0.1
+Pygments==2.19.2
+pyinstaller==6.19.0
+pyinstaller-hooks-contrib==2026.1
+PySide6_Addons==6.10.2
+PySide6_Essentials==6.10.2
+PySide6==6.10.2
+pytest==9.0.2
+pywin32-ctypes==0.2.3
+setuptools==82.0.0
+shiboken6==6.10.2
+SQLAlchemy==2.0.47
+typing_extensions==4.15.0

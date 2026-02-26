@@ -1,38 +1,20 @@
-# MC_Teklif_Pro
+﻿# MC_Teklif_pro
 
-MC_Teklif_Pro, Windows için geliştirilmiş, offline çalışabilen, teklif hazırlama ve PDF üretme uygulamasıdır.
+## Setup (Windows PowerShell)
 
-## Özellikler
-- **Teklif Hazırlama:** Müşteri bilgileri, kalemler, fiyatlar, KDV ve iskonto hesaplamaları.
-- **PDF Üretimi:** Profesyonel görünümlü PDF çıktıları (HTML/CSS tabanlı).
-- **Offline Çalışma:** İnternet bağlantısı gerektirmez.
-- **Otomatik Kayıt:** Çalışmalarınız otomatik olarak taslak olarak kaydedilir.
-- **Arşivleme:** Teklifleriniz SQLite veritabanında saklanır ve düzenli yedeklenir.
+python -m venv .venv_new
+.\.venv_new\Scripts\Activate.ps1
+python -m pip install -r requirements.lock.txt
 
-## Kurulum
-1. `MC_Teklif_Pro_Setup.exe` dosyasını çalıştırın.
-2. Kurulum sihirbazını takip edin.
-3. Masaüstündeki kısayoldan uygulamayı başlatın.
+## Importers (idempotent + sha256 proof)
 
-## Geliştirme Ortamı Kurulumu
-Bu projeyi geliştirmek veya kaynak kodundan çalıştırmak için:
+Customers:
+python -m app.importers.customers_import .\customers_template.xlsx
 
-1. Python 3.12+ kurulu olduğundan emin olun.
-2. PowerShell'i yönetici olarak çalıştırın (gerekirse).
-3. Proje dizininde şu komutu çalıştırın:
-   ```powershell
-   .\scripts\setup.ps1
-   ```
-   Bu komut sanal ortamı oluşturur, bağımlılıkları yükler ve testleri çalıştırır.
+Products:
+python app\importers\products_import.py .\products_template.xlsx
 
-## Build (Exe Oluşturma)
-Dağıtılabilir `Setup.exe` dosyasını oluşturmak için:
-1. Inno Setup 6'nın kurulu olduğundan emin olun.
-2. Şu komutu çalıştırın:
-   ```powershell
-   .\scripts\build.ps1
-   ```
-   Çıktı `dist_installer` klasöründe olacaktır.
-
-## Lisans
-Bu proje özel mülkiyettir.
+## Output / Artifacts
+- Runtime outputs and error reports are stored under .\_out\
+- Backups are stored under .\_bak\
+- These are gitignored by design.
