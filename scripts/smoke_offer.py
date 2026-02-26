@@ -65,11 +65,16 @@ def main():
         # args
         parser = argparse.ArgumentParser()
         parser.add_argument("--fresh", action="store_true", help="Create a unique SMOKE offer_no (timestamped).")
+        parser.add_argument("--deterministic", action="store_true", help="Use fixed offer_no and fixed data for deterministic CI runs.")
         args, _ = parser.parse_known_args()
 
         # offer_no
-        fmt = "%Y%m%d-%H%M%S" if args.fresh else "%Y%m%d"
-        offer_no = "SMOKE-" + datetime.now().strftime(fmt)
+        # offer_no
+        if args.deterministic:
+            offer_no = "SMOKE-DETERMINISTIC"
+        else:
+            fmt = "%Y%m%d-%H%M%S" if args.fresh else "%Y%m%d"
+            offer_no = "SMOKE-" + datetime.now().strftime(fmt)
         o = db.query(Offer).filter(Offer.offer_no == offer_no).one_or_none()
 
         created = False
