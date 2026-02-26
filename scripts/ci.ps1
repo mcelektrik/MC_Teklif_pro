@@ -80,6 +80,7 @@ $summary = [ordered]@{
   branch         = $branch
   commit         = $commit
   fresh          = [bool]$Fresh
+  deterministic  = [bool]$Deterministic
   exit_code      = $exit
   duration_ms    = [int]$sw.ElapsedMilliseconds
   log_path       = $logAbs
