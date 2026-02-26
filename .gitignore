@@ -13,3 +13,9 @@ _RUN_*.log
 *.db
 *.sqlite
 *.sqlite3
+# generated / local artifacts
+browsers/
+_RUN_*.log
+_out/
+.venv/
+.venv_new/
