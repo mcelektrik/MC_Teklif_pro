@@ -95,11 +95,16 @@ $summary = [ordered]@{
 # Write summary JSON (always)
 ($summary | ConvertTo-Json -Depth 6) | Set-Content -Encoding UTF8 $sumAbs
 
+# Update LATEST summary (always)
+$latest = Join-Path (Resolve-Path $sumDir).Path "CI_SUMMARY_LATEST.json"
+Copy-Item $sumAbs $latest -Force
+
 if($exit -ne 0){
-  Write-Host ("CI_FAIL exit={0}" -f $exit)
+  Write-Error ("CI_FAIL exit={0}" -f $exit)
   exit $exit
 }
 
 Write-Host "CI_PASS"
 exit 0
+
 
