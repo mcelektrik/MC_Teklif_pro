@@ -32,8 +32,8 @@ New-Item -ItemType Directory -Force -Path $logDir | Out-Null
 New-Item -ItemType Directory -Force -Path $sumDir | Out-Null
 
 $stamp = Get-Date -Format yyyyMMdd_HHmmss
-$log = Join-Path $logDir ("CI_{0}.log" -f $stamp)
-$sum = Join-Path $sumDir ("CI_SUMMARY_{0}.json" -f $stamp)
+$logAbs = Join-Path (Resolve-Path $logDir).Path ("CI_{0}.log" -f $stamp)
+$sumAbs = Join-Path (Resolve-Path $sumDir).Path ("CI_SUMMARY_{0}.json" -f $stamp)
 
 # Python metadata (best effort)
 $py = (Get-Command python -ErrorAction SilentlyContinue).Source
@@ -47,15 +47,15 @@ Write-Host ("COMMIT = {0}" -f $commit)
 Write-Host ("FRESH  = {0}" -f ([bool]$Fresh))
 Write-Host ("PY     = {0}" -f $py)
 Write-Host ("PYVER  = {0}" -f $pyVer)
-Write-Host ("LOG    = {0}" -f $log)
-Write-Host ("SUMMARY= {0}" -f $sum)
+Write-Host ("LOG    = {0}" -f $logAbs)
+Write-Host ("SUMMARY= {0}" -f $sumAbs)
 
 # Run runner and tee all output
 $cmd = @("powershell","-NoProfile","-ExecutionPolicy","Bypass","-File",".\scripts\run.ps1")
 if($Fresh){ $cmd += "-Fresh" }
 
 $out = & $cmd[0] $cmd[1] $cmd[2] $cmd[3] $cmd[4] $cmd[5] $cmd[6] 2>&1
-$out | Tee-Object -FilePath $log | Out-Host
+$out | Tee-Object -FilePath $logAbs | Out-Host
 $exit = $LASTEXITCODE
 
 # Extract key proofs from output (best effort)
@@ -81,7 +81,8 @@ $summary = [ordered]@{
   fresh          = [bool]$Fresh
   exit_code      = $exit
   duration_ms    = [int]$sw.ElapsedMilliseconds
-  log_path       = (Resolve-Path $log).Path
+  log_path       = $logAbs
+  summary_path   = $sumAbs
   python         = $py
   python_version = $pyVer
   db_counts      = [ordered]@{
@@ -92,7 +93,7 @@ $summary = [ordered]@{
 }
 
 # Write summary JSON (always)
-($summary | ConvertTo-Json -Depth 6) | Set-Content -Encoding UTF8 $sum
+($summary | ConvertTo-Json -Depth 6) | Set-Content -Encoding UTF8 $sumAbs
 
 if($exit -ne 0){
   Write-Host ("CI_FAIL exit={0}" -f $exit)
@@ -101,3 +102,4 @@ if($exit -ne 0){
 
 Write-Host "CI_PASS"
 exit 0
+
