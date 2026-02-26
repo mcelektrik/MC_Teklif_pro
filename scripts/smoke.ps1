@@ -1,6 +1,7 @@
 ﻿param(
   [string]$CustomersXlsx = ".\customers_template.xlsx",
-  [string]$ProductsXlsx  = ".\products_template.xlsx"
+  [string]$ProductsXlsx  = ".\products_template.xlsx",
+  [switch]$Fresh
 )
 
 $ErrorActionPreference="Stop"
@@ -14,4 +15,16 @@ Write-Host "OK: compileall"
 & $py -m app.importers.customers_import $CustomersXlsx
 & $py app\importers\products_import.py $ProductsXlsx
 
+
+Write-Host "== SMOKE_OFFER =="
+if ($Fresh) {
+  & $py .\scripts\smoke_offer.py --fresh
+} else {
+  & $py .\scripts\smoke_offer.py
+}
+Write-Host "OK: smoke_offer"
+
+Write-Host "== DB_COUNTS =="
+powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\db_counts.ps1
+Write-Host "OK: db_counts"
 Write-Host "SMOKE_OK"
