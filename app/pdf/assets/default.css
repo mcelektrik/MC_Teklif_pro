@@ -1,0 +1,111 @@
+@page {
+    size: A4;
+    margin: 20mm;
+}
+
+body {
+    font-family: 'Helvetica', 'Arial', sans-serif;
+    font-size: 10pt;
+    line-height: 1.4;
+    color: #333;
+}
+
+.container {
+    width: 100%;
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 30px;
+    border-bottom: 2px solid #eee;
+    padding-bottom: 20px;
+}
+
+.company-info h1 {
+    font-size: 18pt;
+    margin: 0;
+    color: #2c3e50;
+}
+
+.logo {
+    max-height: 80px;
+    margin-bottom: 10px;
+}
+
+.offer-meta table {
+    text-align: right;
+}
+
+.offer-meta th {
+    text-align: right;
+    padding-right: 10px;
+    color: #7f8c8d;
+}
+
+.customer-info {
+    margin-bottom: 30px;
+    background: #f9f9f9;
+    padding: 15px;
+    border-radius: 5px;
+}
+
+.items table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 30px;
+}
+
+.items th, .items td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+}
+
+.items th {
+    background-color: #f2f2f2;
+    font-weight: bold;
+}
+
+.totals {
+    float: right;
+    width: 40%;
+    margin-bottom: 30px;
+}
+
+.totals table {
+    width: 100%;
+}
+
+.totals th {
+    text-align: right;
+    padding-right: 10px;
+}
+
+.totals td {
+    text-align: right;
+    font-weight: bold;
+}
+
+.grand-total {
+    font-size: 14pt;
+    color: #e74c3c;
+    border-top: 2px solid #333;
+}
+
+footer {
+    clear: both;
+    margin-top: 50px;
+    border-top: 1px solid #eee;
+    padding-top: 20px;
+    font-size: 9pt;
+}
+
+.signature {
+    margin-top: 30px;
+    text-align: right;
+}
+
+.signature img {
+    max-height: 100px;
+}

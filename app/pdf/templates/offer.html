@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>Teklif - {{ offer.offer_no }}</title>
+    <link rel="stylesheet" href="{{ css_path }}">
+    <style>
+        /* Fallback styles if CSS not loaded */
+        body { font-family: 'Arial', sans-serif; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header>
+            <div class="company-info">
+                {% if settings.logo_path %}
+                <img src="{{ settings.logo_path }}" alt="Logo" class="logo">
+                {% endif %}
+                <h1>{{ settings.company_name }}</h1>
+                <p>{{ settings.company_address }}</p>
+                <p>Tel: {{ settings.company_phone }}</p>
+                <p>Vergi No: {{ settings.company_tax_no }}</p>
+            </div>
+            <div class="offer-meta">
+                <h2>TEKLİF</h2>
+                <table>
+                    <tr>
+                        <th>Teklif No:</th>
+                        <td>{{ offer.offer_no }}</td>
+                    </tr>
+                    <tr>
+                        <th>Tarih:</th>
+                        <td>{{ offer.created_at.strftime('%d.%m.%Y') }}</td>
+                    </tr>
+                    <tr>
+                        <th>Geçerlilik:</th>
+                        <td>{{ offer.validity_days }} Gün</td>
+                    </tr>
+                </table>
+            </div>
+        </header>
+
+        <!-- Customer Info -->
+        <section class="customer-info">
+            <h3>Sayın,</h3>
+            <p><strong>{{ offer.customer.name }}</strong></p>
+            <p>{{ offer.customer.address }}</p>
+            {% if offer.customer.tax_no %}
+            <p>Vergi Dairesi: {{ offer.customer.tax_office }} / Vergi No: {{ offer.customer.tax_no }}</p>
+            {% endif %}
+        </section>
+
+        <!-- Items Table -->
+        <section class="items">
+            <table>
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Açıklama</th>
+                        <th>Miktar</th>
+                        <th>Birim</th>
+                        <th>Birim Fiyat</th>
+                        <th>KDV %</th>
+                        <th>İskonto %</th>
+                        <th>Tutar</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in offer.items %}
+                    <tr>
+                        <td>{{ loop.index }}</td>
+                        <td>{{ item.description }}</td>
+                        <td>{{ item.quantity }}</td>
+                        <td>{{ item.unit }}</td>
+                        <td>{{ "{:,.2f}".format(item.unit_price) }} {{ offer.currency }}</td>
+                        <td>{{ item.vat_rate }}</td>
+                        <td>{{ item.discount_percent }}</td>
+                        <td>{{ "{:,.2f}".format(item.total_price) }} {{ offer.currency }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </section>
+
+        <!-- Totals -->
+        <section class="totals">
+            <table>
+                <tr>
+                    <th>Ara Toplam:</th>
+                    <td>{{ "{:,.2f}".format(offer.sub_total) }} {{ offer.currency }}</td>
+                </tr>
+                {% if offer.discount_total > 0 %}
+                <tr>
+                    <th>İskonto Toplamı:</th>
+                    <td>{{ "{:,.2f}".format(offer.discount_total) }} {{ offer.currency }}</td>
+                </tr>
+                {% endif %}
+                <tr>
+                    <th>KDV Toplamı:</th>
+                    <td>{{ "{:,.2f}".format(offer.vat_total) }} {{ offer.currency }}</td>
+                </tr>
+                <tr class="grand-total">
+                    <th>GENEL TOPLAM:</th>
+                    <td>{{ "{:,.2f}".format(offer.grand_total) }} {{ offer.currency }}</td>
+                </tr>
+            </table>
+        </section>
+
+        <!-- Footer / Notes -->
+        <footer>
+            <div class="notes">
+                <h3>Notlar:</h3>
+                <p>{{ offer.note }}</p>
+            </div>
+            
+            <div class="bank-info">
+                <h3>Banka Bilgileri:</h3>
+                <p>{{ settings.company_iban }}</p>
+            </div>
+
+            {% if settings.signature_path %}
+            <div class="signature">
+                <img src="{{ settings.signature_path }}" alt="İmza/Kaşe">
+            </div>
+            {% endif %}
+        </footer>
+    </div>
+</body>
+</html>

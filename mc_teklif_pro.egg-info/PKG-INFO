@@ -1,0 +1,52 @@
+Metadata-Version: 2.4
+Name: mc-teklif-pro
+Version: 0.1.0
+Summary: Teklif hazırlama ve PDF üretme uygulaması
+Author-email: User <user@example.com>
+Requires-Python: >=3.12
+Description-Content-Type: text/markdown
+Requires-Dist: PySide6>=6.6.0
+Requires-Dist: SQLAlchemy>=2.0.0
+Requires-Dist: playwright>=1.40.0
+Requires-Dist: Jinja2>=3.1.0
+Requires-Dist: pytest>=7.4.0
+Requires-Dist: pyinstaller>=6.3.0
+
+# MC_Teklif_Pro
+
+MC_Teklif_Pro, Windows için geliştirilmiş, offline çalışabilen, teklif hazırlama ve PDF üretme uygulamasıdır.
+
+## Özellikler
+- **Teklif Hazırlama:** Müşteri bilgileri, kalemler, fiyatlar, KDV ve iskonto hesaplamaları.
+- **PDF Üretimi:** Profesyonel görünümlü PDF çıktıları (HTML/CSS tabanlı).
+- **Offline Çalışma:** İnternet bağlantısı gerektirmez.
+- **Otomatik Kayıt:** Çalışmalarınız otomatik olarak taslak olarak kaydedilir.
+- **Arşivleme:** Teklifleriniz SQLite veritabanında saklanır ve düzenli yedeklenir.
+
+## Kurulum
+1. `MC_Teklif_Pro_Setup.exe` dosyasını çalıştırın.
+2. Kurulum sihirbazını takip edin.
+3. Masaüstündeki kısayoldan uygulamayı başlatın.
+
+## Geliştirme Ortamı Kurulumu
+Bu projeyi geliştirmek veya kaynak kodundan çalıştırmak için:
+
+1. Python 3.12+ kurulu olduğundan emin olun.
+2. PowerShell'i yönetici olarak çalıştırın (gerekirse).
+3. Proje dizininde şu komutu çalıştırın:
+   ```powershell
+   .\scripts\setup.ps1
+   ```
+   Bu komut sanal ortamı oluşturur, bağımlılıkları yükler ve testleri çalıştırır.
+
+## Build (Exe Oluşturma)
+Dağıtılabilir `Setup.exe` dosyasını oluşturmak için:
+1. Inno Setup 6'nın kurulu olduğundan emin olun.
+2. Şu komutu çalıştırın:
+   ```powershell
+   .\scripts\build.ps1
+   ```
+   Çıktı `dist_installer` klasöründe olacaktır.
+
+## Lisans
+Bu proje özel mülkiyettir.

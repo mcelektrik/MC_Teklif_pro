@@ -1,0 +1,7 @@
+_bak/
+_out/
+_import_errors_*.xlsx
+__pycache__/
+*.pyc
+*.pyo
+.venv*/

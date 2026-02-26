@@ -1,0 +1,174 @@
+from __future__ import annotations
+
+from pathlib import Path
+from typing import Any
+import json
+import hashlib
+import re
+
+from openpyxl import load_workbook
+
+from app.core.db import SessionLocal
+from app.core.schema import Customer
+
+# --- helpers (match style of products_import) ---
+def norm_str(v: Any) -> str:
+    if v is None:
+        return ""
+    s = str(v).strip()
+    return s
+
+def clean_hdr(h: str | None) -> str | None:
+    h = norm_str(h)
+    if not h:
+        return None
+    # drop anything after '*' and remove parenthetical hints: 'ad* (..)' -> 'ad'
+    h = h.split("*", 1)[0].strip()
+    h = re.sub(r"\s*\(.*?\)\s*", "", h).strip()
+    return h or None
+
+def import_customers_from_excel(xlsx_path: str, sheet_name: str | None = None) -> dict[str, Any]:
+    path = Path(xlsx_path).resolve()
+    wb = load_workbook(path, data_only=True)
+    ws = wb[sheet_name] if sheet_name else wb.active
+
+    headers = [clean_hdr(c.value) for c in ws[1]]
+    idx = {h: i for i, h in enumerate(headers) if h}
+
+    required = ["unvan"]  # minimum
+    for k in required:
+        if k not in idx:
+            return {
+                "file": str(path),
+
+  "file_sha256": hashlib.sha256(Path(xlsx_path).read_bytes()).hexdigest(),
+                "error": f"Missing required column: {k}. Found headers={headers}",
+                "ok_rows": 0,
+                "skipped_rows": 0,
+                "inserted": 0,
+                "updated": 0,
+            }
+
+    def get(row, key: str):
+        i = idx.get(key)
+        if i is None:
+            return None
+        return row[i].value if i < len(row) else None
+
+    ok = skipped = inserted = updated = 0
+
+    db = SessionLocal()
+    try:
+        # start from row 2
+        for r in ws.iter_rows(min_row=2):
+            # skip empty/note lines: if "ad" empty -> skip
+            name = norm_str(get(r, "unvan")) or norm_str(get(r, "ad"))
+            # SKIP_NOTE_ROWS
+            _n = (name or "").strip().lower()
+            if _n in ("notlar","zorunlu alan: unvan") or _n.startswith("eÃƒÆ’Ã¢â‚¬Â¦Ãƒâ€¦Ã‚Â¸leÃƒÆ’Ã¢â‚¬Â¦Ãƒâ€¦Ã‚Â¸tirme ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¶nerisi:") or _n.startswith("musteri_iskonto_oran"):
+                skipped += 1
+                continue
+            if not name or name.upper() in ("NOTLAR",):
+                skipped += 1
+                continue
+
+            phone = norm_str(get(r, "telefon")) or None
+            email = norm_str(get(r, "email")) or None
+            address = norm_str(get(r, "adres")) or None
+            tax_office = norm_str(get(r, "vergi_dairesi")) or None
+            tax_no = norm_str(get(r, "vergi_no")) or None
+            contact = norm_str(get(r, "yetkili_kisi")) or None
+            note = norm_str(get(r, "not")) or None
+
+            # upsert key: prefer tax_no if exists else (name+phone)
+            q = db.query(Customer)
+            c = None
+            if tax_no:
+                c = q.filter(Customer.tax_no == tax_no).one_or_none()
+            if c is None and phone:
+                c = q.filter(Customer.name == name, Customer.phone == phone).one_or_none()
+            if c is None:
+                c = q.filter(Customer.name == name).one_or_none()
+
+            if c:
+                changed = False
+                # name zorunlu; degistiyse yaz
+                if c.name != name:
+                    c.name = name
+                    changed = True
+                # diger alanlar: None gelirse dokunma; farkliysa guncelle
+                if phone is not None and getattr(c, 'phone', None) != phone:
+                    c.phone = phone
+                    changed = True
+                if email is not None and getattr(c, 'email', None) != email:
+                    c.email = email
+                    changed = True
+                if address is not None and getattr(c, 'address', None) != address:
+                    c.address = address
+                    changed = True
+                if tax_office is not None and getattr(c, 'tax_office', None) != tax_office:
+                    c.tax_office = tax_office
+                    changed = True
+                if tax_no is not None and getattr(c, 'tax_no', None) != tax_no:
+                    c.tax_no = tax_no
+                    changed = True
+                # opsiyonel alanlar
+                if hasattr(c, 'contact_name') and contact is not None and getattr(c, 'contact_name', None) != contact:
+                    setattr(c, 'contact_name', contact)
+                    changed = True
+                if hasattr(c, 'note') and note is not None and getattr(c, 'note', None) != note:
+                    setattr(c, 'note', note)
+                    changed = True
+                if changed:
+                    updated += 1
+            else:
+                c = Customer(
+                    name=name,
+                    phone=phone,
+                    email=email,
+                    address=address,
+                    tax_office=tax_office,
+                    tax_no=tax_no,
+                )
+                if hasattr(c, "contact_name") and contact is not None:
+                    setattr(c, "contact_name", contact)
+                if hasattr(c, "note") and note is not None:
+                    setattr(c, "note", note)
+                db.add(c)
+                inserted += 1
+
+            ok += 1
+
+        db.commit()
+        return {
+            "file": str(path),
+
+  "file_sha256": hashlib.sha256(Path(xlsx_path).read_bytes()).hexdigest(),
+            "ok_rows": ok,
+            "skipped_rows": skipped,
+            "inserted": inserted,
+            "updated": updated,
+            "error": None,
+        }
+    except Exception as e:
+        db.rollback()
+        return {
+            "file": str(path),
+
+  "file_sha256": hashlib.sha256(Path(xlsx_path).read_bytes()).hexdigest(),
+            "ok_rows": ok,
+            "skipped_rows": skipped,
+            "inserted": inserted,
+            "updated": updated,
+            "error": str(e),
+        }
+    finally:
+        db.close()
+
+
+if __name__ == "__main__":
+    import sys
+    if len(sys.argv) < 2:
+        raise SystemExit("Usage: python -m app.importers.customers_import <xlsx_path>")
+    res = import_customers_from_excel(sys.argv[1])
+    print(json.dumps(res, ensure_ascii=False, indent=2))
