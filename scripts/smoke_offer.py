@@ -1,6 +1,7 @@
 ﻿from __future__ import annotations
 
 from datetime import datetime
+import argparse
 from app.core.db import SessionLocal
 from app.core.schema import Customer, Product, Offer, OfferItem
 
@@ -61,7 +62,14 @@ def main():
         if not p:
             raise SystemExit("NO_PRODUCT: products table empty (import products first)")
 
-        offer_no = "SMOKE-" + datetime.now().strftime("%Y%m%d")
+        # args
+        parser = argparse.ArgumentParser()
+        parser.add_argument("--fresh", action="store_true", help="Create a unique SMOKE offer_no (timestamped).")
+        args, _ = parser.parse_known_args()
+
+        # offer_no
+        fmt = "%Y%m%d-%H%M%S" if args.fresh else "%Y%m%d"
+        offer_no = "SMOKE-" + datetime.now().strftime(fmt)
         o = db.query(Offer).filter(Offer.offer_no == offer_no).one_or_none()
 
         created = False
@@ -128,3 +136,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
+
+
