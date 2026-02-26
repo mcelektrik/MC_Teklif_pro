@@ -1,7 +1,8 @@
 ﻿param(
   [string]$CustomersXlsx = ".\customers_template.xlsx",
   [string]$ProductsXlsx  = ".\products_template.xlsx",
-  [switch]$Fresh
+  [switch]$Fresh,
+  [switch]$Deterministic
 )
 
 $ErrorActionPreference="Stop"
@@ -17,7 +18,9 @@ Write-Host "OK: compileall"
 
 
 Write-Host "== SMOKE_OFFER =="
-if ($Fresh) {
+if ($Deterministic) {
+  & $py .\scripts\smoke_offer.py --deterministic
+} elseif ($Fresh) {
   & $py .\scripts\smoke_offer.py --fresh
 } else {
   & $py .\scripts\smoke_offer.py
@@ -28,3 +31,4 @@ Write-Host "== DB_COUNTS =="
 powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\db_counts.ps1
 Write-Host "OK: db_counts"
 Write-Host "SMOKE_OK"
+

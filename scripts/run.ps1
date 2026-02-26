@@ -1,26 +1,18 @@
 ﻿param(
-  [switch]$Fresh
+  [switch]$Fresh,
+  [switch]$Deterministic
 )
 
 $ErrorActionPreference="Stop"
+if($Fresh -and $Deterministic){ throw "Fresh and Deterministic cannot be used together." }
 
-# Activate venv if present
-if(Test-Path ".\.venv_new\Scripts\Activate.ps1"){ . .\.venv_new\Scripts\Activate.ps1 }
+# Ensure cwd = repo root
+Set-Location (Split-Path -Parent $PSScriptRoot)
 
-# Safety: block tracked/stray BAK artifacts outside _bak
-$bakOutside = Get-ChildItem -Recurse -File -Filter "*.BAK_*" |
-  Where-Object { $_.FullName -notlike "*\_bak\*" }
-if($bakOutside.Count -ne 0){
-  Write-Host "ERROR: BAK files found outside _bak. Move them into _bak or delete before running."
-  $bakOutside | Select-Object -ExpandProperty FullName | ForEach-Object { " - $_" }
-  exit 2
-}
+# Delegate to smoke.ps1
+$cmd = @("powershell","-NoProfile","-ExecutionPolicy","Bypass","-File",".\scripts\smoke.ps1")
+if($Deterministic){ $cmd += "-Deterministic" }
+elseif($Fresh){ $cmd += "-Fresh" }
 
-# Delegate to smoke
-if($Fresh){
-  powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\smoke.ps1 -Fresh
-} else {
-  powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\smoke.ps1
-}
-
-Write-Host "RUN_OK"
+& $cmd[0] $cmd[1] $cmd[2] $cmd[3] $cmd[4] $cmd[5] $cmd[6]
+exit $LASTEXITCODE

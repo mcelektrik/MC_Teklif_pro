@@ -1,5 +1,6 @@
 ﻿param(
-  [switch]$Fresh
+  [switch]$Fresh,
+  [switch]$Deterministic
 )
 
 $ErrorActionPreference="Stop"
@@ -52,7 +53,7 @@ Write-Host ("SUMMARY= {0}" -f $sumAbs)
 
 # Run runner and tee all output
 $cmd = @("powershell","-NoProfile","-ExecutionPolicy","Bypass","-File",".\scripts\run.ps1")
-if($Fresh){ $cmd += "-Fresh" }
+if($Deterministic){ $cmd += "-Deterministic" } elseif($Fresh){ $cmd += "-Fresh" }
 
 $out = & $cmd[0] $cmd[1] $cmd[2] $cmd[3] $cmd[4] $cmd[5] $cmd[6] 2>&1
 $out | Tee-Object -FilePath $logAbs | Out-Host
@@ -106,5 +107,6 @@ if($exit -ne 0){
 
 Write-Host "CI_PASS"
 exit 0
+
 
 
