@@ -5,3 +5,11 @@ __pycache__/
 *.pyc
 *.pyo
 .venv*/
+# --- generated / local artifacts ---
+browsers/
+_RUN_*.log
+.venv/
+.venv_new/
+*.db
+*.sqlite
+*.sqlite3
